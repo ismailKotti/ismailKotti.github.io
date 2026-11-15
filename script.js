@@ -299,10 +299,8 @@ function initPortfolioApp() {
 
   // 5. Typewriter Role Rotator
   const roles = [
-    'Angular & NestJS Architect',
-    'FastAPI & AI Builder',
-    '3D Motion & UI Designer',
-    'Software Engineering Student'
+    'Software Engineering Student',
+    'Video Editor'
   ];
   const roleEl = document.getElementById('role-typewriter');
   let roleIdx = 0;
