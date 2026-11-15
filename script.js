@@ -560,14 +560,75 @@ function initPortfolioApp() {
     });
   }
 
-  // Contact form submission with direct email sending & fallback
+  // Contact form submission with conditions validation & fallback
   const contactForm = document.getElementById('contact-form');
-  const formFeedback = document.getElementById('form-feedback');
+  const nameInput = document.getElementById('contact-name');
+  const emailInput = document.getElementById('contact-email');
+  const msgInput = document.getElementById('contact-message');
+  const consentInput = document.getElementById('contact-consent');
+  const nameError = document.getElementById('name-error');
+  const emailError = document.getElementById('email-error');
+  const msgError = document.getElementById('message-error');
+  const consentError = document.getElementById('consent-error');
+  const charCounter = document.getElementById('char-counter');
+
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  }
+
+  function setFieldState(input, errorEl, isValid) {
+    if (!input) return;
+    if (isValid) {
+      input.classList.remove('border-rose-500/80', 'focus:border-rose-500');
+      input.classList.add('border-emerald-500/40');
+      if (errorEl) errorEl.classList.add('hidden');
+    } else {
+      input.classList.remove('border-emerald-500/40');
+      input.classList.add('border-rose-500/80', 'focus:border-rose-500');
+      if (errorEl) errorEl.classList.remove('hidden');
+    }
+  }
+
+  // Real-time input listeners
+  if (nameInput) {
+    nameInput.addEventListener('input', () => {
+      const valid = nameInput.value.trim().length >= 2;
+      setFieldState(nameInput, nameError, valid);
+    });
+  }
+
+  if (emailInput) {
+    emailInput.addEventListener('input', () => {
+      const valid = validateEmail(emailInput.value.trim());
+      setFieldState(emailInput, emailError, valid);
+    });
+  }
+
+  if (msgInput && charCounter) {
+    msgInput.addEventListener('input', () => {
+      const len = msgInput.value.trim().length;
+      charCounter.textContent = `${len}/10 min`;
+      if (len >= 10) {
+        charCounter.classList.remove('text-gray-500', 'text-amber-400');
+        charCounter.classList.add('text-emerald-400');
+        setFieldState(msgInput, msgError, true);
+      } else {
+        charCounter.classList.remove('text-emerald-400');
+        charCounter.classList.add(len > 0 ? 'text-amber-400' : 'text-gray-500');
+      }
+    });
+  }
+
+  if (consentInput && consentError) {
+    consentInput.addEventListener('change', () => {
+      if (consentInput.checked) {
+        consentError.classList.add('hidden');
+      }
+    });
+  }
+
   if (contactForm) {
     const submitBtn = contactForm.querySelector('button[type="submit"]');
-    const nameInput = document.getElementById('contact-name');
-    const emailInput = document.getElementById('contact-email');
-    const msgInput = document.getElementById('contact-message');
 
     contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -575,6 +636,37 @@ function initPortfolioApp() {
       const name = nameInput ? nameInput.value.trim() : '';
       const email = emailInput ? emailInput.value.trim() : '';
       const message = msgInput ? msgInput.value.trim() : '';
+      const hasConsent = consentInput ? consentInput.checked : true;
+
+      // Check all form conditions
+      const isNameValid = name.length >= 2;
+      const isEmailValid = validateEmail(email);
+      const isMsgValid = message.length >= 10;
+
+      setFieldState(nameInput, nameError, isNameValid);
+      setFieldState(emailInput, emailError, isEmailValid);
+      setFieldState(msgInput, msgError, isMsgValid);
+
+      if (consentError) {
+        if (!hasConsent) {
+          consentError.classList.remove('hidden');
+        } else {
+          consentError.classList.add('hidden');
+        }
+      }
+
+      // If any condition fails, shake the form and stop
+      if (!isNameValid || !isEmailValid || !isMsgValid || !hasConsent) {
+        contactForm.classList.add('animate-shake');
+        setTimeout(() => contactForm.classList.remove('animate-shake'), 450);
+
+        // Focus first invalid field
+        if (!isNameValid && nameInput) nameInput.focus();
+        else if (!isEmailValid && emailInput) emailInput.focus();
+        else if (!isMsgValid && msgInput) msgInput.focus();
+        else if (!hasConsent && consentInput) consentInput.focus();
+        return;
+      }
 
       const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'Send Message →';
       if (submitBtn) {
@@ -594,6 +686,21 @@ function initPortfolioApp() {
       const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}\n\n---\nSent from Ismail Kotti's Portfolio`);
       const mailtoUrl = `mailto:kottiismail501@gmail.com?subject=${subject}&body=${body}`;
 
+      function resetFormFields() {
+        contactForm.reset();
+        if (charCounter) {
+          charCounter.textContent = '0/10 min';
+          charCounter.classList.remove('text-emerald-400', 'text-amber-400');
+          charCounter.classList.add('text-gray-500');
+        }
+        [nameInput, emailInput, msgInput].forEach(inp => {
+          if (inp) {
+            inp.classList.remove('border-emerald-500/40', 'border-rose-500/80');
+            inp.classList.add('border-white/10');
+          }
+        });
+      }
+
       try {
         const response = await fetch('https://formsubmit.co/ajax/kottiismail501@gmail.com', {
           method: 'POST',
@@ -612,16 +719,16 @@ function initPortfolioApp() {
         const data = await response.json().catch(() => null);
 
         if (response.ok && data && data.success !== 'false') {
-          contactForm.reset();
+          resetFormFields();
           showAlertModal('Message Sent Successfully!', `Thank you ${name || 'there'}! Your message has been sent directly to Ismail Kotti. I'll get back to you within 24 hours.`);
         } else {
           window.location.href = mailtoUrl;
-          contactForm.reset();
+          resetFormFields();
           showAlertModal('Message Ready to Send!', `Thank you ${name || 'there'}! We have opened your email client to send your message directly to kottiismail501@gmail.com.`);
         }
       } catch (err) {
         window.location.href = mailtoUrl;
-        contactForm.reset();
+        resetFormFields();
         showAlertModal('Message Ready to Send!', `Thank you ${name || 'there'}! We have opened your email client to send your message directly to kottiismail501@gmail.com.`);
       } finally {
         if (submitBtn) {
