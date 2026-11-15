@@ -17,3 +17,4 @@ echo If push succeeded, your site will be live in 1-2 minutes at:
 echo https://ismailkotti.github.io
 echo.
 pause
+

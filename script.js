@@ -521,10 +521,51 @@ function initPortfolioApp() {
     if (modalGoForm) modalGoForm.addEventListener('click', closeModal);
   }
 
+  // Alert modal helper
+  function showAlertModal(title, message) {
+    const alertModal = document.getElementById('contact-alert-modal');
+    const alertTitle = document.getElementById('contact-alert-title');
+    const alertText = document.getElementById('contact-alert-text');
+    if (alertModal) {
+      if (alertTitle && title) alertTitle.textContent = title;
+      if (alertText && message) alertText.textContent = message;
+      alertModal.classList.remove('hidden');
+      alertModal.classList.add('flex');
+
+      if (typeof confetti === 'function') {
+        try {
+          confetti({
+            particleCount: 75,
+            spread: 60,
+            origin: { y: 0.65 }
+          });
+        } catch (_) {}
+      }
+    }
+  }
+
+  const alertModal = document.getElementById('contact-alert-modal');
+  const closeAlertBtn = document.getElementById('close-alert-btn');
+  if (alertModal && closeAlertBtn) {
+    function closeAlert() {
+      alertModal.classList.add('hidden');
+      alertModal.classList.remove('flex');
+    }
+    closeAlertBtn.addEventListener('click', closeAlert);
+    alertModal.addEventListener('click', (e) => {
+      if (e.target === alertModal) closeAlert();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !alertModal.classList.contains('hidden')) {
+        closeAlert();
+      }
+    });
+  }
+
   // Contact form submission with direct email sending & fallback
   const contactForm = document.getElementById('contact-form');
   const formFeedback = document.getElementById('form-feedback');
-  if (contactForm && formFeedback) {
+  if (contactForm) {
     const submitBtn = contactForm.querySelector('button[type="submit"]');
     const nameInput = document.getElementById('contact-name');
     const emailInput = document.getElementById('contact-email');
@@ -570,26 +611,25 @@ function initPortfolioApp() {
           })
         });
 
-        if (response.ok) {
-          formFeedback.innerHTML = `✓ Thank you ${name}! Your message has been sent to Ismail.`;
-          formFeedback.style.opacity = '1';
+        const data = await response.json().catch(() => null);
+
+        if (response.ok && data && data.success !== 'false') {
           contactForm.reset();
+          showAlertModal('Message Sent Successfully!', `Thank you ${name || 'there'}! Your message has been sent directly to Ismail Kotti. I'll get back to you within 24 hours.`);
         } else {
-          throw new Error('FormSubmit error');
+          window.location.href = mailtoUrl;
+          contactForm.reset();
+          showAlertModal('Message Ready to Send!', `Thank you ${name || 'there'}! We have opened your email client to send your message directly to kottiismail501@gmail.com.`);
         }
       } catch (err) {
-        // Fallback to mailto so the user can send directly via their email client
         window.location.href = mailtoUrl;
-        formFeedback.innerHTML = `✓ Opening email client... If it didn't open, <a href="${mailtoUrl}" class="underline text-cyan-300 font-bold">click here to send</a>.`;
-        formFeedback.style.opacity = '1';
+        contactForm.reset();
+        showAlertModal('Message Ready to Send!', `Thank you ${name || 'there'}! We have opened your email client to send your message directly to kottiismail501@gmail.com.`);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalBtnHtml;
         }
-        setTimeout(() => {
-          formFeedback.style.opacity = '0';
-        }, 8000);
       }
     });
   }
