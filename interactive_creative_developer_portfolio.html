@@ -564,12 +564,12 @@
             </p>
           </div>
 
-          <form id="contact-form" novalidate class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 pop-z-30">
+          <form id="contact-form" class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 pop-z-30">
             <!-- Name Condition -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <label for="contact-name" class="block font-mono text-xs text-gray-400">YOUR NAME *</label>
-                <span id="name-error" class="font-mono text-[11px] text-rose-400 hidden">Min. 2 characters required</span>
+                <span id="name-error" class="font-mono text-[11px] text-rose-400 hidden">Min. 2 characters</span>
               </div>
               <input 
                 type="text" 
@@ -604,8 +604,8 @@
               <div class="flex items-center justify-between mb-2">
                 <label for="contact-message" class="block font-mono text-xs text-gray-400">PROJECT DETAILS *</label>
                 <div class="flex items-center gap-2">
-                  <span id="message-error" class="font-mono text-[11px] text-rose-400 hidden">Min. 10 characters required</span>
-                  <span id="char-counter" class="font-mono text-[10px] text-gray-500">0/10 min</span>
+                  <span id="message-error" class="font-mono text-[11px] text-rose-400 hidden">Message required</span>
+                  <span id="char-counter" class="font-mono text-[10px] text-gray-500">0 characters</span>
                 </div>
               </div>
               <textarea 
@@ -613,8 +613,6 @@
                 name="message" 
                 rows="3" 
                 required 
-                minlength="10"
-                maxlength="1000"
                 placeholder="Tell me about your timeline, stack, or product goals..." 
                 class="w-full px-4 py-3.5 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500 transition-all"
               ></textarea>
@@ -626,7 +624,7 @@
                 <input 
                   type="checkbox" 
                   id="contact-consent" 
-                  required 
+                  checked
                   class="mt-1 w-4 h-4 rounded bg-black/50 border border-white/20 text-indigo-500 focus:ring-0 cursor-pointer accent-indigo-500" 
                 />
                 <span class="text-xs text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed">
@@ -646,7 +644,7 @@
               <button 
                 type="submit" 
                 id="send-message-btn"
-                class="magnetic px-8 py-4 rounded-2xl accent-btn-gradient text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 hover:brightness-110 transition-all" 
+                class="magnetic px-8 py-4 rounded-2xl accent-btn-gradient text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 hover:brightness-110 transition-all cursor-pointer" 
                 data-cursor="Send"
               >
                 Send Message →
