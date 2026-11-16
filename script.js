@@ -628,21 +628,35 @@ function initPortfolioApp() {
   }
 
   if (contactForm) {
-    const submitBtn = contactForm.querySelector('button[type="submit"]');
+    const submitBtn = document.getElementById('send-message-btn') || contactForm.querySelector('button[type="submit"]');
 
-    contactForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      // Check native browser validity first so user sees native speech bubbles if empty
-      if (!contactForm.checkValidity()) {
-        contactForm.reportValidity();
-        return;
-      }
+    async function processFormSubmit(e) {
+      if (e) e.preventDefault();
 
       const name = nameInput ? nameInput.value.trim() : '';
       const email = emailInput ? emailInput.value.trim() : '';
       const message = msgInput ? msgInput.value.trim() : '';
       const hasConsent = consentInput ? consentInput.checked : true;
+
+      // If empty, show immediate visual errors and focus
+      if (!name || !email || !message) {
+        if (!name) {
+          setFieldState(nameInput, nameError, false);
+          if (nameInput) nameInput.focus();
+        }
+        if (!email) {
+          setFieldState(emailInput, emailError, false);
+          if (name && emailInput) emailInput.focus();
+        }
+        if (!message) {
+          setFieldState(msgInput, msgError, false);
+          if (name && email && msgInput) msgInput.focus();
+        }
+
+        contactForm.classList.add('animate-shake');
+        setTimeout(() => contactForm.classList.remove('animate-shake'), 450);
+        return;
+      }
 
       // Validate email format
       const isEmailValid = validateEmail(email);
@@ -752,7 +766,12 @@ function initPortfolioApp() {
           submitBtn.innerHTML = originalBtnHtml;
         }
       }
-    });
+    }
+
+    contactForm.addEventListener('submit', processFormSubmit);
+    if (submitBtn) {
+      submitBtn.addEventListener('click', processFormSubmit);
+    }
   }
 }
 
